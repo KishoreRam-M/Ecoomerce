@@ -45,7 +45,7 @@ public class ProductService {
         return productRepo.searchProducts(keyword, pageable);
     }
 
-    Page<Product> findByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
+    public Page<Product> findByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
         return productRepo.findByPriceRange(minPrice, maxPrice, pageable);
     }
 
@@ -89,5 +89,12 @@ public class ProductService {
         productRepo.delete(product);
     }
 
+
+    public Page<Product> getActiveProducts(Pageable pageable) {
+        return productRepo.findByActiveTrue(pageable);
+    }
+    public List<Product> getFeaturedProducts() {
+        return productRepo.findByFeaturedTrue();
+    }
 
 }
