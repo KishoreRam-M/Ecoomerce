@@ -1,5 +1,6 @@
 package com.krm.Mini.Eccommerce.Service;
 
+import com.krm.Mini.Eccommerce.Exception.ResourceNotFoundException;
 import com.krm.Mini.Eccommerce.Model.Category;
 import com.krm.Mini.Eccommerce.Repo.CategoryRepo;
 import jakarta.transaction.Transactional;

@@ -1,6 +1,6 @@
 package com.krm.Mini.Eccommerce.Exception;
 
-class ResourceNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends RuntimeException {
 
     public ResourceNotFoundException(String message) {
         super(message);

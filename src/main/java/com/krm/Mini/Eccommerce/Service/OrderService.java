@@ -1,5 +1,6 @@
 package com.krm.Mini.Eccommerce.Service;
 
+import com.krm.Mini.Eccommerce.Exception.ResourceNotFoundException;
 import com.krm.Mini.Eccommerce.Model.Order;
 import com.krm.Mini.Eccommerce.Model.OrderItem;
 import com.krm.Mini.Eccommerce.Model.Product;
@@ -44,7 +45,8 @@ public class OrderService {
     public Order createdOrder(Order order, List<OrderItem> items) {
         Double totalAmount = 0.0;
         for (OrderItem item : items) {
-            Product product = productRepo.findById(item.getProduct().getId()).orElse(() -> new ResourceNotFoundException("Product not found with id :" + item.getId()));
+            Product product = productRepo.findById(item.getProduct().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + item.getProduct().getId()));
             if (product.getStock() < item.getQuantity()) {
                 throw new IllegalArgumentException("Not enough stock for product: " + product.getName());
             }
@@ -55,14 +57,14 @@ public class OrderService {
 
         }
         order.setTotalAmount(totalAmount);
-        Order SavedOrder =orderRepo.save(order);
-        for(OrderItem item :items)
-        {
+        Order SavedOrder = orderRepo.save(order);
+        for (OrderItem item : items) {
             item.setOrder(SavedOrder);
         }
         SavedOrder.setItems(items);
-        return  orderRepo.save(SavedOrder);
+        return orderRepo.save(SavedOrder);
     }
+
     @Transactional
     public Order updateOrderStatus(Long id, Order.OrderStatus status) {
         Order order = getOrderById(id);

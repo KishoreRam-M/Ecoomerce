@@ -1,5 +1,6 @@
 package com.krm.Mini.Eccommerce.Service;
 
+import com.krm.Mini.Eccommerce.Exception.ResourceNotFoundException;
 import com.krm.Mini.Eccommerce.Model.Category;
 import com.krm.Mini.Eccommerce.Model.Product;
 import com.krm.Mini.Eccommerce.Repo.CategoryRepo;
@@ -28,7 +29,8 @@ public class ProductService {
 
 
     public Product getProductByID(Long id) {
-        return productRepo.findById(id).orElse(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        return productRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
     public List<Product> getActiveProducts() {
@@ -53,7 +55,8 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(Product product, Long ID) {
-        Category category = categoryRepo.findById(ID).orElse(() -> new ResourceNotFoundException("Category not found with id :" + ID));
+        Category category = categoryRepo.findById(ID)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + ID));
         product.setCategory(category);
         return productRepo.save(product);
     }
