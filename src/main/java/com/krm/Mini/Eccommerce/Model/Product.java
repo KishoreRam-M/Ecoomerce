@@ -31,6 +31,8 @@ public class Product {
 
     private Integer stock;
     private Double rating;
+    @Column(nullable = false)
+    @Builder.Default
     private boolean featured = false;
     private boolean active = true;
     private String sku;
