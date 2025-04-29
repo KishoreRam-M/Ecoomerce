@@ -6,6 +6,7 @@ import com.krm.Mini.Eccommerce.Repo.CategoryRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -41,6 +42,19 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long id) {
         categoryRepo.deleteById(id);
+    }
+
+    @Transactional
+    public Category updateCategory(Long id, Category categoryDetails) {
+        Category category = getCategoryById(id);
+
+        category.setName(categoryDetails.getName());
+        category.setDescription(categoryDetails.getDescription());
+        category.setImageUrl(categoryDetails.getImageUrl());
+        category.setActive(categoryDetails.isActive());
+        category.setUpdatedAt(LocalDateTime.now());
+
+        return categoryRepo.save(category);
     }
 
 }
