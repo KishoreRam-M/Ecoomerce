@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-do
 import Categories from './Componets/categories';
 import Products from './Componets/Product';
 import OrderComponent from './Componets/OrderComponent';
+import CategoryProducts from './Componets/CategoryProducts'; // Import the new CategoryProducts component
 
 const App = () => {
   return (
@@ -58,6 +59,8 @@ const App = () => {
             <Route path="/categories" element={<Categories />} />
             <Route path="/products" element={<Products />} />
             <Route path="/orders" element={<OrderComponent />} />
+            {/* Add the new CategoryProducts route */}
+            <Route path="/category-products/:categoryId" element={<CategoryProducts />} />
           </Routes>
         </div>
 
