@@ -1,0 +1,12 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "tailwindcss";
+
+/* index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+a {
+  text-decoration: none;
+}
