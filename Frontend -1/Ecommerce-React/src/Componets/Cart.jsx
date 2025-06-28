@@ -7,15 +7,18 @@ const Cart = ({
   customerInfo, 
   setCustomerInfo, 
   orderSuccess, 
+  setOrderSuccess,
   removeFromCart,
   updateCartItemQuantity,
   calculateCartTotal,
   placeOrder,
-  getImageUrl
+  getImageUrl,
+  clearCart
 }) => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [orderError, setOrderError] = useState(null);
 
   const handleCustomerInfoChange = (e) => {
     const { name, value } = e.target;
@@ -84,6 +87,7 @@ const Cart = ({
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
+    setOrderError(null);
     
     // Mark all fields as touched
     const allTouched = Object.keys(customerInfo).reduce((acc, key) => {
@@ -93,15 +97,37 @@ const Cart = ({
     
     setTouched(allTouched);
     
-    if (validateForm()) {
-      setIsPlacingOrder(true);
-      try {
-        await placeOrder();
-      } catch (error) {
-        console.error('Order placement failed:', error);
-      } finally {
-        setIsPlacingOrder(false);
-      }
+    if (!validateForm()) {
+      setOrderError('Please fill all required fields correctly');
+      return;
+    }
+
+    if (cart.length === 0) {
+      setOrderError('Your cart is empty');
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    try {
+      const orderData = {
+        customer: customerInfo,
+        items: cart.map(item => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          imageUrl: item.product.imageUrl
+        })),
+        total: calculateCartTotal(),
+        status: 'PENDING'
+      };
+
+      await placeOrder(orderData);
+    } catch (error) {
+      console.error('Order placement failed:', error);
+      setOrderError(error.message || 'Failed to place order. Please try again.');
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -113,7 +139,10 @@ const Cart = ({
         <div className="flex justify-between items-center border-b border-gray-700 p-6">
           <h3 className="text-xl font-bold text-white">Your Shopping Cart</h3>
           <button 
-            onClick={() => setShowCart(false)} 
+            onClick={() => {
+              setShowCart(false);
+              setOrderSuccess(false);
+            }}
             className="text-gray-400 hover:text-white"
             aria-label="Close cart"
           >
@@ -124,7 +153,7 @@ const Cart = ({
         </div>
         
         <div className="p-6">
-          {cart.length === 0 ? (
+          {cart.length === 0 && !orderSuccess ? (
             <div className="text-center text-gray-400 py-10">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -139,9 +168,28 @@ const Cart = ({
               </svg>
               <h3 className="text-xl font-semibold text-white mb-2">Order Placed Successfully!</h3>
               <p className="text-gray-300">Thank you for your order. You'll receive a confirmation email shortly.</p>
+              <button
+                onClick={() => {
+                  setShowCart(false);
+                  setOrderSuccess(false);
+                }}
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-md"
+              >
+                Close
+              </button>
             </div>
           ) : (
             <>
+              {orderError && (
+                <div className="bg-red-600 bg-opacity-20 border border-red-500 rounded-lg p-4 mb-6 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h3 className="text-xl font-semibold text-white mb-2">Order Failed</h3>
+                  <p className="text-gray-300">{orderError}</p>
+                </div>
+              )}
+              
               <div className="bg-gray-700 rounded-lg overflow-hidden mb-6">
                 <table className="min-w-full divide-y divide-gray-600">
                   <thead className="bg-gray-800">
@@ -219,7 +267,7 @@ const Cart = ({
 
               <div className="bg-gray-700 rounded-lg p-6 mb-6">
                 <h4 className="text-lg font-semibold text-white mb-4">Customer Information</h4>
-                <form onSubmit={handlePlaceOrder}>
+                <form onSubmit={handlePlaceOrder} noValidate>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
@@ -301,8 +349,10 @@ const Cart = ({
                     </div>
                     <button
                       type="submit"
-                      disabled={isPlacingOrder}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isPlacingOrder || cart.length === 0}
+                      className={`bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md ${
+                        isPlacingOrder || cart.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
                       {isPlacingOrder ? 'Placing Order...' : 'Place Order'}
                     </button>
