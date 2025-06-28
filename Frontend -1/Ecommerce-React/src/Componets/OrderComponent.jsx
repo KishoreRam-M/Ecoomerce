@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const OrderComponent = () => {
+const OrderComponent = ({ refreshTrigger }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -10,7 +10,7 @@ const OrderComponent = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [activeTab]);
+  }, [activeTab, refreshTrigger]);
 
   const fetchOrders = () => {
     let url = 'http://localhost:8080/api/orders';
@@ -24,7 +24,6 @@ const OrderComponent = () => {
     }
     
     if (dateRange.startDate && dateRange.endDate) {
-      // Convert dates to ISO format for API
       const startISO = new Date(dateRange.startDate).toISOString();
       const endISO = new Date(dateRange.endDate).toISOString();
       url = `http://localhost:8080/api/orders/date-range?startDate=${startISO}&endDate=${endISO}`;
@@ -32,18 +31,21 @@ const OrderComponent = () => {
     
     fetch(url)
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         return response.json();
       })
       .then(data => {
+        console.log('Orders data:', data);
+        if (!Array.isArray(data)) {
+          throw new Error('Expected array of orders but got:', data);
+        }
         setOrders(data);
         setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching orders:', error);
         setLoading(false);
+        setOrders([]);
       });
   };
 
@@ -63,18 +65,7 @@ const OrderComponent = () => {
     setSearchEmail('');
     setDateRange({ startDate: '', endDate: '' });
     setActiveTab('all');
-    
-    fetch('http://localhost:8080/api/orders')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setOrders(data);
-      })
-      .catch(error => console.error('Error fetching orders:', error));
+    fetchOrders();
   };
 
   const viewOrderDetail = (order) => {
@@ -87,33 +78,21 @@ const OrderComponent = () => {
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'PENDING':
-        return 'bg-yellow-500';
-      case 'PROCESSING':
-        return 'bg-blue-500';
-      case 'SHIPPED':
-        return 'bg-indigo-600';
-      case 'DELIVERED':
-        return 'bg-green-500';
-      case 'CANCELLED':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
+      case 'PENDING': return 'bg-yellow-500';
+      case 'PROCESSING': return 'bg-blue-500';
+      case 'SHIPPED': return 'bg-indigo-600';
+      case 'DELIVERED': return 'bg-green-500';
+      case 'CANCELLED': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    
     try {
       const date = new Date(dateString);
-      
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
-      }
-      
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+      return isNaN(date.getTime()) ? 'Invalid date' : 
+        date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Invalid date';
@@ -122,25 +101,20 @@ const OrderComponent = () => {
 
   const updateOrderStatus = (orderId, newStatus) => {
     fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
-      method: 'PATCH', // Changed from PUT to PATCH to match the controller
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ status: newStatus }),
     })
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         return response.json();
       })
-      .then(data => {
-        // Update order in state
+      .then(() => {
         setOrders(orders.map(order => 
           order.id === orderId ? { ...order, status: newStatus } : order
         ));
-        
-        // Update order detail if open
         if (orderDetail && orderDetail.id === orderId) {
           setOrderDetail({ ...orderDetail, status: newStatus });
         }
@@ -148,20 +122,14 @@ const OrderComponent = () => {
       .catch(error => console.error('Error updating order status:', error));
   };
 
-  // Add delete order functionality
   const deleteOrder = (orderId) => {
-    if (window.confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete this order?')) {
       fetch(`http://localhost:8080/api/orders/${orderId}`, {
         method: 'DELETE',
       })
         .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          // Remove deleted order from state
+          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
           setOrders(orders.filter(order => order.id !== orderId));
-          
-          // Close detail modal if currently viewing the deleted order
           if (orderDetail && orderDetail.id === orderId) {
             setOrderDetail(null);
           }
@@ -221,9 +189,7 @@ const OrderComponent = () => {
                   type="submit"
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-md"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                  </svg>
+                  Search
                 </button>
               </form>
             </div>
@@ -233,14 +199,12 @@ const OrderComponent = () => {
               <form onSubmit={handleDateFilter} className="flex gap-2">
                 <input
                   type="date"
-                  placeholder="Start Date"
                   className="w-1/2 px-4 py-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-white bg-gray-800"
                   value={dateRange.startDate}
                   onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
                 />
                 <input
                   type="date"
-                  placeholder="End Date"
                   className="w-1/2 px-4 py-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-white bg-gray-800"
                   value={dateRange.endDate}
                   onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
@@ -256,67 +220,19 @@ const OrderComponent = () => {
           </div>
           
           <div className="flex flex-wrap gap-2 mb-6">
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`px-4 py-2 rounded-md ${
-                activeTab === 'all'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              All Orders
-            </button>
-            <button
-              onClick={() => setActiveTab('PENDING')}
-              className={`px-4 py-2 rounded-md ${
-                activeTab === 'PENDING'
-                  ? 'bg-yellow-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              Pending
-            </button>
-            <button
-              onClick={() => setActiveTab('PROCESSING')}
-              className={`px-4 py-2 rounded-md ${
-                activeTab === 'PROCESSING'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              Processing
-            </button>
-            <button
-              onClick={() => setActiveTab('SHIPPED')}
-              className={`px-4 py-2 rounded-md ${
-                activeTab === 'SHIPPED'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              Shipped
-            </button>
-            <button
-              onClick={() => setActiveTab('DELIVERED')}
-              className={`px-4 py-2 rounded-md ${
-                activeTab === 'DELIVERED'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              Delivered
-            </button>
-            <button
-              onClick={() => setActiveTab('CANCELLED')}
-              className={`px-4 py-2 rounded-md ${
-                activeTab === 'CANCELLED'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              Cancelled
-            </button>
-            
+            {['all', 'PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setActiveTab(status)}
+                className={`px-4 py-2 rounded-md ${
+                  activeTab === status
+                    ? status === 'all' ? 'bg-indigo-600' : getStatusColor(status)
+                    : 'bg-gray-700'
+                } text-white`}
+              >
+                {status === 'all' ? 'All Orders' : status}
+              </button>
+            ))}
             <button
               onClick={handleClearFilters}
               className="ml-auto bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-md"
@@ -347,7 +263,7 @@ const OrderComponent = () => {
                     <span className={`${getStatusColor(order.status)} text-white text-sm px-3 py-1 rounded-full mr-4`}>
                       {order.status}
                     </span>
-                    <span className="text-indigo-500 font-bold">${order.totalAmount.toFixed(2)}</span>
+                    <span className="text-indigo-500 font-bold">${order.totalAmount?.toFixed(2) || '0.00'}</span>
                   </div>
                 </div>
                 
@@ -416,7 +332,7 @@ const OrderComponent = () => {
                         {orderDetail.status}
                       </span>
                     </p>
-                    <p className="text-gray-300"><span className="text-gray-400">Total Amount:</span> ${orderDetail.totalAmount.toFixed(2)}</p>
+                    <p className="text-gray-300"><span className="text-gray-400">Total Amount:</span> ${orderDetail.totalAmount?.toFixed(2) || '0.00'}</p>
                     <p className="text-gray-300"><span className="text-gray-400">Order Date:</span> {formatDate(orderDetail.createdAt)}</p>
                     <p className="text-gray-300"><span className="text-gray-400">Last Updated:</span> {formatDate(orderDetail.updatedAt)}</p>
                   </div>
@@ -436,12 +352,14 @@ const OrderComponent = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-600">
-                      {orderDetail.items.map((item) => (
-                        <tr key={item.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{item.productName}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${item.priceAtPurchase.toFixed(2)}</td>
+                      {orderDetail.items.map((item, index) => (
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{item.productName || `Product ${item.productId}`}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${item.priceAtPurchase?.toFixed(2) || '0.00'}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{item.quantity}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            ${((item.priceAtPurchase || 0) * item.quantity).toFixed(2)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -455,39 +373,26 @@ const OrderComponent = () => {
               
               <div className="flex justify-between items-center">
                 <div className="flex flex-wrap gap-2">
-                  <button 
-                    onClick={() => updateOrderStatus(orderDetail.id, 'PROCESSING')}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm"
-                    disabled={orderDetail.status === 'PROCESSING' || orderDetail.status === 'SHIPPED' || orderDetail.status === 'DELIVERED' || orderDetail.status === 'CANCELLED'}
-                  >
-                    Process
-                  </button>
-                  <button 
-                    onClick={() => updateOrderStatus(orderDetail.id, 'SHIPPED')}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md text-sm"
-                    disabled={orderDetail.status === 'SHIPPED' || orderDetail.status === 'DELIVERED' || orderDetail.status === 'CANCELLED' || orderDetail.status === 'PENDING'}
-                  >
-                    Ship
-                  </button>
-                  <button 
-                    onClick={() => updateOrderStatus(orderDetail.id, 'DELIVERED')}
-                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm"
-                    disabled={orderDetail.status === 'DELIVERED' || orderDetail.status === 'CANCELLED' || orderDetail.status === 'PENDING'}
-                  >
-                    Mark Delivered
-                  </button>
-                  <button 
-                    onClick={() => updateOrderStatus(orderDetail.id, 'CANCELLED')}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm"
-                    disabled={orderDetail.status === 'DELIVERED' || orderDetail.status === 'CANCELLED'}
-                  >
-                    Cancel
-                  </button>
+                  {['PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((status) => (
+                    <button 
+                      key={status}
+                      onClick={() => updateOrderStatus(orderDetail.id, status)}
+                      className={`${getStatusColor(status)} hover:opacity-90 text-white px-3 py-1 rounded-md text-sm`}
+                      disabled={
+                        (orderDetail.status === 'DELIVERED' || orderDetail.status === 'CANCELLED') ||
+                        (status === 'PROCESSING' && orderDetail.status !== 'PENDING') ||
+                        (status === 'SHIPPED' && orderDetail.status !== 'PROCESSING') ||
+                        (status === 'DELIVERED' && orderDetail.status !== 'SHIPPED')
+                      }
+                    >
+                      {status === 'CANCELLED' ? 'Cancel' : status.charAt(0) + status.slice(1).toLowerCase()}
+                    </button>
+                  ))}
                 </div>
                 
                 <div className="text-right">
                   <p className="text-gray-400 text-sm">Order Total</p>
-                  <p className="text-xl font-bold text-indigo-500">${orderDetail.totalAmount.toFixed(2)}</p>
+                  <p className="text-xl font-bold text-indigo-500">${orderDetail.totalAmount?.toFixed(2) || '0.00'}</p>
                 </div>
               </div>
             </div>
