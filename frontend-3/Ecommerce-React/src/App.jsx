@@ -165,7 +165,7 @@ const App = () => {
             <div className="flex justify-between h-16">
               <div className="flex items-center">
                 <NavLink to="/" className="flex-shrink-0 text-indigo-600 text-2xl font-bold">
-                  KRM House
+                  The Zaffora
                 </NavLink>
               </div>
               <div className="hidden md:flex items-center space-x-1">
@@ -242,16 +242,19 @@ const App = () => {
 const Home = () => (
   <div className="text-center mt-10">
     <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight tracking-tight">
-      Welcome to <span className="text-indigo-500">KrmHouse Admin</span>
+      Welcome to <span className="text-indigo-500">The Zaffora</span>
     </h1>
     <p className="text-lg md:text-xl text-indigo-400 font-medium max-w-2xl mx-auto mb-4">
       A flagship product of <strong>KRM Enterprises</strong>
     </p>
     <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto mb-2">
-      Premium e-commerce solution for modern businesses
+      Premium D2C solution for modern businesses
     </p>
-    <br />
-    <div className="flex justify-center gap-4">
+    <p className="text-sm md:text-base text-gray-500 max-w-2xl mx-auto mb-6">
+      Powered by <span className="text-indigo-400 font-bold">Zaffora</span> - India's premier D2C brand
+    </p>
+    
+    <div className="flex justify-center gap-4 mb-12">
       <NavLink to="/categories" className="px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
         View Categories
       </NavLink>
@@ -259,7 +262,103 @@ const Home = () => (
         Browse Products
       </NavLink>
     </div>
-    <br /><br /><br /><br /><br /><br /><br /><br /><br />
+
+    {/* About Section */}
+    <div className="max-w-4xl mx-auto mb-12 bg-gray-800 rounded-lg p-8">
+      <h2 className="text-3xl font-bold text-white mb-6">About <span className="text-indigo-400">Zaffora</span></h2>
+      <div className="text-left space-y-4">
+        <p className="text-gray-300 leading-relaxed">
+          <span className="text-indigo-400 font-bold">Zaffora</span> is a revolutionary D2C (Direct-to-Consumer) brand under KRM Enterprises, 
+          dedicated to bringing premium quality products directly to your doorstep. We believe in cutting out the middleman 
+          to provide you with the best value and authentic shopping experience.
+        </p>
+        <p className="text-gray-300 leading-relaxed">
+          Based in the heart of Tamil Nadu, India, we operate from Tenkasi, Kadayanallur, bringing you a curated selection 
+          of products that meet the highest standards of quality and innovation. Our commitment to excellence drives us to 
+          continuously evolve and adapt to your needs.
+        </p>
+        <p className="text-gray-300 leading-relaxed">
+          At <span className="text-indigo-400 font-bold">Zaffora</span>, we're not just selling products - we're building 
+          relationships, creating experiences, and fostering a community of satisfied customers who trust us for their 
+          everyday needs and special occasions.
+        </p>
+        <div className="grid md:grid-cols-3 gap-4 mt-6">
+          <div className="bg-gray-700 p-4 rounded-lg">
+            <h3 className="text-indigo-400 font-bold mb-2">Quality First</h3>
+            <p className="text-gray-300 text-sm">Every product is carefully selected and tested to ensure premium quality.</p>
+          </div>
+          <div className="bg-gray-700 p-4 rounded-lg">
+            <h3 className="text-indigo-400 font-bold mb-2">Direct to Consumer</h3>
+            <p className="text-gray-300 text-sm">No middlemen, better prices, and authentic products delivered to you.</p>
+          </div>
+          <div className="bg-gray-700 p-4 rounded-lg">
+            <h3 className="text-indigo-400 font-bold mb-2">Local Pride</h3>
+            <p className="text-gray-300 text-sm">Proudly serving from Tamil Nadu, supporting local communities.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Contact Section */}
+    <div className="max-w-4xl mx-auto bg-gray-800 rounded-lg p-8">
+      <h2 className="text-3xl font-bold text-white mb-6">Contact Us</h2>
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="text-left">
+          <h3 className="text-xl font-bold text-white mb-4 ">Get in Touch</h3>
+          <p className="text-gray-300 mb-6">
+            Have questions about our products or need assistance? We're here to help! 
+            Reach out to us through any of the following channels.
+          </p>
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span className="text-gray-300">+91-800-228-6261</span>
+            </div>
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 7.89a2 2 0 002.83 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span className="text-gray-300">kishoreramm.dev@gmail.com</span>
+            </div>
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-gray-300"> Kadayanallur, Tenkasi , Tamil Nadu, India</span>
+            </div>
+          </div>
+        </div>
+        <div className="text-left">
+          <h3 className="text-xl font-bold text-white mb-4 ml-16">Our Founder</h3>
+          <div className="bg-gray-700 p-6 rounded-lg">
+            <h4 className="text-lg font-bold text-white mb-2">Kishore Ram M</h4>
+            <p className="text-gray-300 text-sm mb-4">
+              Visionary entrepreneur and founder of KRM Enterprises, driving innovation in the D2C space 
+              with <span className="text-indigo-400 font-bold">Zaffora</span>.
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 7.89a2 2 0 002.83 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span className="text-gray-300 text-sm">kishoreramm.dev@gmail.com</span>
+              </div>
+              <div className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span className="text-gray-300 text-sm">+91-800-228-6261</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <br /><br /><br />
   </div>
 );
 
